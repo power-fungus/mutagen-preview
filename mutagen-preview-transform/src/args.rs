@@ -33,7 +33,8 @@ impl MutagenArgs {
             Conf::Local => Default::default(),
         };
 
-        let transformer_bundle = MutagenTransformerBundle::new(options.transformers, &transform_info);
+        let transformer_bundle =
+            MutagenTransformerBundle::new(options.transformers, &transform_info);
 
         MutagenArgs {
             transformer_bundle,

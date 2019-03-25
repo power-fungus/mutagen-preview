@@ -5,6 +5,8 @@ use std::io::{BufWriter, Write};
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 
+use proc_macro2::Span;
+
 lazy_static! {
     pub static ref GLOBAL_TRANSFORM_INFO: SharedTransformInfo = Default::default();
 }
@@ -50,15 +52,29 @@ impl MutagenTransformInfo {
     }
 
     /// add a mutation and return the id used for it, also writes the mutation to the global file.
-    pub fn add_mutation(&mut self, mutation: String) -> u32 {
+    pub fn add_mutation(&mut self, mutation: String, span: Span) -> u32 {
         let mut_id = 1 + self.mutations.len() as u32;
 
         // write the mutation if file was configured
         if let Some(mutagen_file) = &mut self.mutagen_file {
+            let start = span.start();
+            let end = span.end();
+            let source_file = span.unwrap().source_file().path();
+            let span_desc = format!(
+                "{}@{}:{}-{}:{}",
+                source_file.display(),
+                start.line,
+                start.column,
+                end.line,
+                end.column
+            );
+
             let mut mutagen_file = BufWriter::new(mutagen_file);
-            writeln!(mutagen_file, "{}: {}", mut_id, &mutation)
+            writeln!(mutagen_file, "{}: {}@{}", mut_id, &mutation, span_desc)
                 .expect("unable to write to mutagen file");
-            mutagen_file.flush().unwrap();
+            mutagen_file
+                .flush()
+                .expect("unable to write to mutagen file");
         }
 
         // add mutation to list
@@ -70,8 +86,8 @@ impl MutagenTransformInfo {
 }
 
 impl SharedTransformInfo {
-    pub fn add_mutation(&self, mutation: String) -> u32 {
-        self.0.lock().unwrap().add_mutation(mutation)
+    pub fn add_mutation(&self, mutation: String, span: Span) -> u32 {
+        self.0.lock().unwrap().add_mutation(mutation, span)
     }
 
     pub fn clone_shared(&self) -> Self {

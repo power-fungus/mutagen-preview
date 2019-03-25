@@ -1,3 +1,5 @@
+use proc_macro2::Span;
+use quote::ToTokens;
 use syn::fold::Fold;
 use syn::{Expr, ItemFn};
 
@@ -11,8 +13,8 @@ use transformer_lit_bool::MutagenTransformerLitBool;
 use transformer_lit_int::MutagenTransformerLitInt;
 use transformer_unop_not::MutagenTransformerUnopNot;
 
-use crate::transform_info::SharedTransformInfo;
 use crate::args::arg_options::Transformers;
+use crate::transform_info::SharedTransformInfo;
 
 pub enum MutagenTransformer {
     Expr(Box<dyn MutagenExprTransformer>),
@@ -26,7 +28,28 @@ pub struct MutagenTransformerBundle {
 ///
 /// each transformer should not inspect the expression recursively since recursion is performed by the `MutagenTransformerBundle`
 pub trait MutagenExprTransformer {
-    fn map_expr(&mut self, expr: Expr) -> Expr;
+    fn map_expr(&mut self, expr: Expr) -> ExprTransformerOutput;
+}
+
+// TODO: document span
+pub enum ExprTransformerOutput {
+    Transformed(TransformedExpr),
+    Unchanged(Expr),
+}
+
+pub struct TransformedExpr {
+    expr: Expr,
+    span: Span,
+}
+
+impl ExprTransformerOutput {
+    pub fn unchanged(expr: Expr) -> Self {
+        ExprTransformerOutput::Unchanged(expr)
+    }
+
+    pub fn changed(expr: Expr, span: Span) -> Self {
+        ExprTransformerOutput::Transformed(TransformedExpr { expr, span })
+    }
 }
 
 impl Fold for MutagenTransformerBundle {
@@ -77,10 +100,17 @@ impl Fold for MutagenTransformerBundle {
 
         // call all transformers on this expression
         for t in &mut self.expr_transformers {
-            result = t.map_expr(result);
+            match t.map_expr(result) {
+                ExprTransformerOutput::Transformed(TransformedExpr { expr, span }) => {
+                    let transformed = replace_span::replace_span(expr.into_token_stream(), span);
+                    result = syn::parse2(transformed).unwrap()
+                }
+                ExprTransformerOutput::Unchanged(e) => {
+                    result = e;
+                }
+            }
         }
         result
-        // WIP: preserve span
     }
 }
 
@@ -96,7 +126,7 @@ impl MutagenTransformerBundle {
                 let mut transformers = list.transformers;
                 transformers.sort_by_key(|t| TRANSFORMER_ORDER[t]);
                 transformers
-            },
+            }
             Transformers::Not(list) => {
                 let mut transformers = all_transformers();
                 for l in &list.transformers {
@@ -110,13 +140,11 @@ impl MutagenTransformerBundle {
         for t in &transformers {
             let t = mk_transformer(t, &[], transform_info.clone_shared());
             match t {
-                MutagenTransformer::Expr(t) => expr_transformers.push(t)
+                MutagenTransformer::Expr(t) => expr_transformers.push(t),
             }
         }
 
-        Self {
-            expr_transformers
-        }
+        Self { expr_transformers }
     }
 }
 
@@ -126,18 +154,10 @@ fn mk_transformer(
     transform_info: SharedTransformInfo,
 ) -> MutagenTransformer {
     match transformer_name {
-        "lit_int" => MutagenTransformer::Expr(box MutagenTransformerLitInt {
-            transform_info: transform_info,
-        }),
-        "lit_bool" => MutagenTransformer::Expr(box MutagenTransformerLitBool {
-            transform_info: transform_info,
-        }),
-        "unop_not" => MutagenTransformer::Expr(box MutagenTransformerUnopNot {
-            transform_info: transform_info,
-        }),
-        "binop_add" => MutagenTransformer::Expr(box MutagenTransformerBinopAdd {
-            transform_info: transform_info,
-        }),
+        "lit_int" => MutagenTransformer::Expr(box MutagenTransformerLitInt { transform_info }),
+        "lit_bool" => MutagenTransformer::Expr(box MutagenTransformerLitBool { transform_info }),
+        "unop_not" => MutagenTransformer::Expr(box MutagenTransformerUnopNot { transform_info }),
+        "binop_add" => MutagenTransformer::Expr(box MutagenTransformerBinopAdd { transform_info }),
         _ => panic!("unknown transformer {}", transformer_name),
     }
 }
@@ -161,4 +181,42 @@ lazy_static! {
             .map(|(i, s)| (s, i))
             .collect()
     };
+}
+
+// TODO: document here and in readme
+#[cfg(procmacro2_semver_exempt)]
+mod replace_span {
+
+    use proc_macro2::{Group, Span, TokenStream, TokenTree};
+
+    // replaces all occurences of the default span with the given one
+    pub fn replace_span(stream: TokenStream, new_span: Span) -> TokenStream {
+        stream
+            .into_iter()
+            .map(|tt| {
+                let mut tt = if let TokenTree::Group(g) = tt {
+                    let new_stream = replace_span(g.stream(), new_span);
+                    TokenTree::Group(Group::new(g.delimiter(), new_stream))
+                } else {
+                    tt
+                };
+                let current_span = tt.span();
+                if Span::call_site().eq(&current_span) {
+                    tt.set_span(current_span.located_at(new_span));
+                } else {
+                }
+                tt
+            })
+            .collect()
+    }
+
+}
+#[cfg(not(procmacro2_semver_exempt))]
+mod replace_span {
+    use proc_macro2::{Span, TokenStream};
+
+    // replaces all occurences of the default span with the given one
+    pub fn replace_span(stream: TokenStream, _new_span: Span) -> TokenStream {
+        stream
+    }
 }

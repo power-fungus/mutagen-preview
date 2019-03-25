@@ -1,4 +1,3 @@
-
 use std::ops::Not;
 
 /// trait that is used to optimistically remove a negation `!` from an expression
@@ -11,8 +10,9 @@ pub trait NotToNone {
     fn may_none(self) -> Self::Output;
 }
 
-impl<T> NotToNone for T where
-    T: Not
+impl<T> NotToNone for T
+where
+    T: Not,
 {
     type Output = <T as Not>::Output;
 
@@ -21,7 +21,8 @@ impl<T> NotToNone for T where
     }
 }
 
-impl<T> NotToNone for T where
+impl<T> NotToNone for T
+where
     T: Not,
     T: Into<<T as Not>::Output>,
 {

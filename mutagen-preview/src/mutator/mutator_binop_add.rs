@@ -2,8 +2,8 @@
 
 use std::ops::Add;
 
-use crate::MutagenRuntimeConfig;
 use crate::optimistic::add_to_sub::AddToSub;
+use crate::MutagenRuntimeConfig;
 
 pub struct MutatorBinopAdd<L, R> {
     mutator_id: u32,

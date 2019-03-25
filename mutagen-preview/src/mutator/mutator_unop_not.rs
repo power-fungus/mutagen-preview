@@ -2,8 +2,8 @@
 
 use std::ops::Not;
 
-use crate::MutagenRuntimeConfig;
 use crate::optimistic::not_to_none::NotToNone;
+use crate::MutagenRuntimeConfig;
 
 pub struct MutatorUnopNot<T> {
     mutator_id: u32,
@@ -12,10 +12,7 @@ pub struct MutatorUnopNot<T> {
 
 impl<T: Not> MutatorUnopNot<T> {
     pub fn new(mutator_id: u32, val: T) -> Self {
-        Self {
-            mutator_id,
-            val,
-        }
+        Self { mutator_id, val }
     }
 
     pub fn run_mutator(self, runtime: &MutagenRuntimeConfig) -> <T as Not>::Output {
@@ -111,9 +108,9 @@ mod tests {
 
     mod test_optimistic_incorrect {
 
+        use super::*;
         use crate::mutate;
         use ::mutagen_preview::MutagenRuntimeConfig;
-        use super::*;
 
         // strings cannot be subtracted, the mutation that changes `+` into `-` should panic
         #[mutate(conf(local), only(unop_not))]
@@ -123,7 +120,10 @@ mod tests {
         #[test]
         fn optimistic_incorrect_inactive() {
             MutagenRuntimeConfig::test_with_mutation_id(0, || {
-                assert_eq!(optimistic_incorrect(OptimisticTestTypeX()), OptimisticTestTypeY());
+                assert_eq!(
+                    optimistic_incorrect(OptimisticTestTypeX()),
+                    OptimisticTestTypeY()
+                );
             })
         }
         #[test]

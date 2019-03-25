@@ -11,7 +11,7 @@ lazy_static = "1.2.0"
 # the `syn` dependency is particularly brittle because helper code for default folds is copied from the source code repository
 # The intention is to update the dependencies manually if they have been updated.
 quote = "=0.6.11"
-proc-macro2 = { version = "=0.4.27", features = ["proc-macro", "nightly"] }
+proc-macro2 = { version = "=0.4.27", features = ["span-locations"] }
 syn = { version = "=0.15.29", features = ["full", "extra-traits", "fold"] }
 
 

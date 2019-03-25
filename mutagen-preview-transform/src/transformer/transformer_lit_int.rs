@@ -1,6 +1,6 @@
 use syn::{parse_quote, Expr, ExprLit, Lit};
 
-use super::MutagenExprTransformer;
+use super::{ExprTransformerOutput, MutagenExprTransformer};
 use crate::transform_info::SharedTransformInfo;
 
 pub struct MutagenTransformerLitInt {
@@ -8,7 +8,7 @@ pub struct MutagenTransformerLitInt {
 }
 
 impl MutagenExprTransformer for MutagenTransformerLitInt {
-    fn map_expr(&mut self, e: Expr) -> Expr {
+    fn map_expr(&mut self, e: Expr) -> ExprTransformerOutput {
         match e {
             Expr::Lit(ExprLit {
                 lit: Lit::Int(l),
@@ -16,16 +16,17 @@ impl MutagenExprTransformer for MutagenTransformerLitInt {
             }) => {
                 let mutator_id = self
                     .transform_info
-                    .add_mutation(format!("LitInt {}", l.value()));
-                parse_quote! {
+                    .add_mutation(format!("LitInt {}", l.value()), l.span());
+                let expr = parse_quote! {
                     <::mutagen_preview::mutator::MutatorLitInt<_>>
                         ::new(#mutator_id, #l)
                         .run_mutator(
                             &mutagen_preview::MutagenRuntimeConfig::get_default()
                         )
-                }
+                };
+                ExprTransformerOutput::changed(expr, l.span())
             }
-            _ => e,
+            _ => ExprTransformerOutput::unchanged(e),
         }
     }
 }

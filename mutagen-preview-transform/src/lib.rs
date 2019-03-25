@@ -1,6 +1,8 @@
 #![feature(box_syntax)]
 #![feature(vec_remove_item)]
 #![feature(specialization)]
+// proc-macro-span feature is required because `proc_macro2` does not export the api for getting source files for spans
+#![feature(proc_macro_span)]
 
 extern crate proc_macro;
 use syn::{parse_macro_input, ItemFn};

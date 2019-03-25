@@ -39,22 +39,21 @@ impl MutagenRuntimeConfig {
 mod test_tools {
 
     use super::*;
-    use std::sync::RwLock;
+    use std::sync::Mutex;
 
     lazy_static! {
-        static ref TEST_LOCK: RwLock<()> = RwLock::new(());
+        static ref TEST_LOCK: Mutex<()> = Mutex::new(());
     }
 
     impl MutagenRuntimeConfig {
-
         /// sets the global `mutation_id` correctly before running the test and runs tests sequentially.
         ///
         /// The lock is required to ensure that set `mutation_id` is valid for the complete duration of the test case.
         pub fn test_with_mutation_id<F: FnOnce() -> ()>(mutation_id: u32, testcase: F) {
-            let lock_result = TEST_LOCK.write();
+            let lock = TEST_LOCK.lock();
             MutagenRuntimeConfig::set_test_config(mutation_id);
             testcase();
-            drop(lock_result); // drop here to extend lifetime of lock guard
+            drop(lock); // drop here to extend lifetime of lock guard
         }
 
         pub fn with_mutation_id(mutation_id: u32) -> Self {
@@ -62,13 +61,13 @@ mod test_tools {
         }
 
         pub fn set_test_config(mutation_id: u32) {
-            *RUNTIME_CONFIG.lock().unwrap() = Some(MutagenRuntimeConfig::with_mutation_id(mutation_id));
+            *RUNTIME_CONFIG.lock().unwrap() =
+                Some(MutagenRuntimeConfig::with_mutation_id(mutation_id));
         }
 
         pub fn clear_test_config() {
             *RUNTIME_CONFIG.lock().unwrap() = None;
         }
-
     }
 }
 
@@ -79,13 +78,13 @@ mod tests {
 
     #[test]
     fn with_mutation_id_1() {
-        MutagenRuntimeConfig::test_with_mutation_id(1, ||{
+        MutagenRuntimeConfig::test_with_mutation_id(1, || {
             assert_eq!(MutagenRuntimeConfig::get_default().mutation_id, 1);
         })
     }
     #[test]
     fn with_mutation_id_0() {
-        MutagenRuntimeConfig::test_with_mutation_id(0, ||{
+        MutagenRuntimeConfig::test_with_mutation_id(0, || {
             assert_eq!(MutagenRuntimeConfig::get_default().mutation_id, 0);
         })
     }

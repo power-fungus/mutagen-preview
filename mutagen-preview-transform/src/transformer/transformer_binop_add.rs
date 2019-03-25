@@ -1,6 +1,7 @@
-use syn::{parse_quote, Expr, ExprBinary, BinOp};
+use syn::spanned::Spanned;
+use syn::{parse_quote, BinOp, Expr, ExprBinary};
 
-use super::MutagenExprTransformer;
+use super::{ExprTransformerOutput, MutagenExprTransformer};
 use crate::transform_info::SharedTransformInfo;
 
 pub struct MutagenTransformerBinopAdd {
@@ -8,26 +9,31 @@ pub struct MutagenTransformerBinopAdd {
 }
 
 impl MutagenExprTransformer for MutagenTransformerBinopAdd {
-    fn map_expr(&mut self, e: Expr) -> Expr {
+    fn map_expr(&mut self, e: Expr) -> ExprTransformerOutput {
         match e {
             Expr::Binary(ExprBinary {
                 attrs: _,
                 left,
                 right,
-                op: BinOp::Add(_),
+                op: BinOp::Add(op_add),
             }) => {
                 let mutator_id = self
                     .transform_info
-                    .add_mutation("LitBinopAdd".to_string());
-                parse_quote! {
+                    .add_mutation("LitBinopAdd".to_string(), op_add.span());
+                let expr = parse_quote! {
                     <::mutagen_preview::mutator::MutatorBinopAdd<_, _>>
                         ::new(#mutator_id, #left, #right)
                         .run_mutator(
                             &mutagen_preview::MutagenRuntimeConfig::get_default()
                         )
-                }
+                };
+                ExprTransformerOutput::changed(expr, op_add.span())
             }
-            _ => e
+            _ => ExprTransformerOutput::unchanged(e),
         }
     }
 }
+
+// TOOD
+// Q1: set spans where?
+// Q2: type for Expr  T conversion

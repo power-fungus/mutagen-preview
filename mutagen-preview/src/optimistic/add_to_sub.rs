@@ -1,4 +1,3 @@
-
 use std::ops::{Add, Sub};
 
 /// trait that is used to optimistically change `+` to `-`.
@@ -21,7 +20,8 @@ where
     }
 }
 
-impl<L, R> AddToSub<R> for L where
+impl<L, R> AddToSub<R> for L
+where
     L: Add<R>,
     L: Sub<R>,
     <L as Sub<R>>::Output: Into<<L as Add<R>>::Output>,
