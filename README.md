@@ -29,9 +29,16 @@ To use the attribute `#[mutate]`, you need to import it.
 use mutagen::mutate;
 ```
 
-Now you can advise mutagen to mutate any function, method, impl, trait impl or whole module (but *not* the whole crate, this is a restriction of procedural macros for now) by prepending `#[cfg_attr(test, mutate)]`. The repository contains an example that shows how mutagen could be used.
+Now you can advise mutagen to mutate any function, method, impl, trait impl or whole module (but *not* the whole crate, this is a restriction of procedural macros for now) by prepending `#[cfg_attr(test, mutate)]`. The use of `cfg_attr` ensures the `#[mutate]` attribute will only be active in test mode. The repository contains an example that shows how mutagen could be used.
 
-The use of `cfg_attr` ensures the `#[mutate]` attribute will only be active in test mode.
+If the test-suite does not compile, the provided error messages may be unhelpful since the location of the generated code is not set correctly. E.g.:
+
+```
+X | #[mutate]
+  | ^^^^^^^^^
+```  
+
+Calling the test suite with `RUSTFLAGS='--cfg procmacro2_semver_exempt' cargo test` sets the spans accordingly and will produce more helpful error messages.
 
 ### Running mutagen
 

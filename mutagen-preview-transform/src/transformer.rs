@@ -102,7 +102,7 @@ impl Fold for MutagenTransformerBundle {
         for t in &mut self.expr_transformers {
             match t.map_expr(result) {
                 ExprTransformerOutput::Transformed(TransformedExpr { expr, span }) => {
-                    let transformed = replace_span::replace_span(expr.into_token_stream(), span);
+                    let transformed = set_true_span::set_true_span(expr.into_token_stream(), span);
                     result = syn::parse2(transformed).unwrap()
                 }
                 ExprTransformerOutput::Unchanged(e) => {
@@ -183,25 +183,28 @@ lazy_static! {
     };
 }
 
-// TODO: document here and in readme
+/// sets the span of the generated code to be at the location of the original code.
+///
+/// However, the flag `procmacro2_semver_exempt` is required. Otherwise the function `located_at` is not exported. It is required to call the test suite with `RUSTFLAGS='--cfg procmacro2_semver_exempt' cargo test` to enable that feature.
 #[cfg(procmacro2_semver_exempt)]
-mod replace_span {
+mod set_true_span {
 
     use proc_macro2::{Group, Span, TokenStream, TokenTree};
 
     // replaces all occurences of the default span with the given one
-    pub fn replace_span(stream: TokenStream, new_span: Span) -> TokenStream {
+    pub fn set_true_span(stream: TokenStream, new_span: Span) -> TokenStream {
         stream
             .into_iter()
             .map(|tt| {
                 let mut tt = if let TokenTree::Group(g) = tt {
-                    let new_stream = replace_span(g.stream(), new_span);
+                    let new_stream = set_true_span(g.stream(), new_span);
                     TokenTree::Group(Group::new(g.delimiter(), new_stream))
                 } else {
                     tt
                 };
                 let current_span = tt.span();
                 if Span::call_site().eq(&current_span) {
+                    // located_at is semver excempt
                     tt.set_span(current_span.located_at(new_span));
                 } else {
                 }
@@ -211,12 +214,14 @@ mod replace_span {
     }
 
 }
+
+/// if the flag `procmacro2_semver_exempt` is not enabled, a dummy implementation is provided, which does not change the spans 
 #[cfg(not(procmacro2_semver_exempt))]
-mod replace_span {
+mod set_true_span {
     use proc_macro2::{Span, TokenStream};
 
     // replaces all occurences of the default span with the given one
-    pub fn replace_span(stream: TokenStream, _new_span: Span) -> TokenStream {
+    pub fn set_true_span(stream: TokenStream, _new_span: Span) -> TokenStream {
         stream
     }
 }
