@@ -108,4 +108,34 @@ mod tests {
             })
         }
     }
+
+    mod test_multiple_adds {
+
+        use crate::mutate;
+        use ::mutagen_preview::MutagenRuntimeConfig;
+
+        // sum of multiple values without brackets
+        #[mutate(conf(local), only(binop_add))]
+        pub fn multiple_adds(i: usize) -> usize {
+             i + 4 + 1
+         }
+        #[test]
+        fn multiple_adds_inactive() {
+            MutagenRuntimeConfig::test_with_mutation_id(0, || {
+                assert_eq!(multiple_adds(5), 10);
+            })
+        }
+        #[test]
+        fn multiple_adds_active1() {
+            MutagenRuntimeConfig::test_with_mutation_id(1, || {
+                assert_eq!(multiple_adds(5), 2);
+            })
+        }
+        #[test]
+        fn multiple_adds_active2() {
+            MutagenRuntimeConfig::test_with_mutation_id(2, || {
+                assert_eq!(multiple_adds(5), 8);
+            })
+        }
+    }
 }
