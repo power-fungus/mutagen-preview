@@ -62,7 +62,7 @@ mod tests {
     mod test_sum_u32 {
 
         use crate::mutate;
-        use ::mutagen_preview::MutagenRuntimeConfig;
+        use ::mutagen::MutagenRuntimeConfig;
 
         // simple test that sums 2 u32 values. Unfortunately, the tag `u32` is necessary
         #[mutate(conf(local), only(binop_add))]
@@ -87,7 +87,7 @@ mod tests {
     mod test_str_add {
 
         use crate::mutate;
-        use ::mutagen_preview::MutagenRuntimeConfig;
+        use ::mutagen::MutagenRuntimeConfig;
 
         // strings cannot be subtracted, the mutation that changes `+` into `-` should panic
         #[mutate(conf(local), only(binop_add))]
@@ -112,7 +112,7 @@ mod tests {
     mod test_multiple_adds {
 
         use crate::mutate;
-        use ::mutagen_preview::MutagenRuntimeConfig;
+        use ::mutagen::MutagenRuntimeConfig;
 
         // sum of multiple values without brackets
         #[mutate(conf(local), only(binop_add))]

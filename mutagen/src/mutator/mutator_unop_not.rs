@@ -79,7 +79,7 @@ mod tests {
     mod test_boolnot {
 
         use crate::mutate;
-        use ::mutagen_preview::MutagenRuntimeConfig;
+        use ::mutagen::MutagenRuntimeConfig;
 
         // simple test that sums 2 u32 values. Unfortunately, the tag `u32` is necessary
         #[mutate(conf(local), only(unop_not))]
@@ -110,7 +110,7 @@ mod tests {
 
         use super::*;
         use crate::mutate;
-        use ::mutagen_preview::MutagenRuntimeConfig;
+        use ::mutagen::MutagenRuntimeConfig;
 
         // strings cannot be subtracted, the mutation that changes `+` into `-` should panic
         #[mutate(conf(local), only(unop_not))]

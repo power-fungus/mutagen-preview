@@ -1,5 +1,5 @@
 [package]
-name = "mutagen-preview-transform"
+name = "mutagen-transform"
 version = "0.2.0"
 authors = ["power-fungus <samuel.pilz@posteo.net>"]
 edition = "2018"

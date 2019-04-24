@@ -88,7 +88,7 @@ mod tests {
 
     mod test_sum_u32 {
         use crate::mutate;
-        use ::mutagen_preview::MutagenRuntimeConfig;
+        use ::mutagen::MutagenRuntimeConfig;
 
         // test that literals, that are nested in a outside expressen, are mutated
         #[mutate(conf(local), only(lit_int))]
@@ -118,7 +118,7 @@ mod tests {
 
     mod test_lit_u8_suffixed {
         use crate::mutate;
-        use ::mutagen_preview::MutagenRuntimeConfig;
+        use ::mutagen::MutagenRuntimeConfig;
 
         #[mutate(conf(local), only(lit_int))]
         fn lit_u8_suffixed() -> u8 {

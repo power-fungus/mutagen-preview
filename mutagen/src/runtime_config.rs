@@ -74,7 +74,7 @@ mod test_tools {
 #[cfg(test)]
 mod tests {
 
-    use ::mutagen_preview::MutagenRuntimeConfig;
+    use ::mutagen::MutagenRuntimeConfig;
 
     #[test]
     fn with_mutation_id_1() {

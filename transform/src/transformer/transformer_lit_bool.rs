@@ -1,30 +1,30 @@
-use syn::{parse_quote, Expr, ExprLit, Lit};
+use syn::{parse_quote, Expr, ExprLit, Lit, LitBool};
 
 use super::{ExprTransformerOutput, MutagenExprTransformer};
 use crate::transform_info::SharedTransformInfo;
 
-pub struct MutagenTransformerLitInt {
+pub struct MutagenTransformerLitBool {
     pub transform_info: SharedTransformInfo,
 }
 
-impl MutagenExprTransformer for MutagenTransformerLitInt {
+// transforms bool literals to mutator expressions
+impl MutagenExprTransformer for MutagenTransformerLitBool {
     fn map_expr(&mut self, e: Expr) -> ExprTransformerOutput {
         match e {
             Expr::Lit(ExprLit {
-                lit: Lit::Int(l),
+                lit: Lit::Bool(LitBool { value, span }),
                 attrs: _,
             }) => {
                 let mutator_id = self
                     .transform_info
-                    .add_mutation(format!("LitInt {}", l.value()), l.span());
+                    .add_mutation(format!("LitBool {} -> {}", value, !value), span);
                 let expr = parse_quote! {
-                    <::mutagen_preview::mutator::MutatorLitInt<_>>
-                        ::new(#mutator_id, #l)
+                    ::mutagen::mutator::MutatorLitBool::new(#mutator_id, #value)
                         .run_mutator(
-                            &mutagen_preview::MutagenRuntimeConfig::get_default()
+                            &mutagen::MutagenRuntimeConfig::get_default()
                         )
                 };
-                ExprTransformerOutput::changed(expr, l.span())
+                ExprTransformerOutput::changed(expr, span)
             }
             _ => ExprTransformerOutput::unchanged(e),
         }

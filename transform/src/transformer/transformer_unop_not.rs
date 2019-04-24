@@ -20,10 +20,10 @@ impl MutagenExprTransformer for MutagenTransformerUnopNot {
                     .transform_info
                     .add_mutation("LitUnopNot".to_string(), op_not.span());
                 let expr = parse_quote! {
-                    <::mutagen_preview::mutator::MutatorUnopNot<_>>
+                    <::mutagen::mutator::MutatorUnopNot<_>>
                         ::new(#mutator_id, #expr)
                         .run_mutator(
-                            &mutagen_preview::MutagenRuntimeConfig::get_default()
+                            &mutagen::MutagenRuntimeConfig::get_default()
                         )
                 };
                 ExprTransformerOutput::changed(expr, op_not.span())

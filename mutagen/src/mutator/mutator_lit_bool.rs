@@ -58,7 +58,7 @@ mod tests {
     mod test_simple_true {
 
         use crate::mutate;
-        use ::mutagen_preview::MutagenRuntimeConfig;
+        use ::mutagen::MutagenRuntimeConfig;
 
         #[mutate(conf(local), only(lit_bool))]
         fn simple_true() -> bool {
@@ -81,7 +81,7 @@ mod tests {
     mod test_simple_false {
 
         use crate::mutate;
-        use ::mutagen_preview::MutagenRuntimeConfig;
+        use ::mutagen::MutagenRuntimeConfig;
 
         // constant false
         #[mutate(conf(local), only(lit_bool))]

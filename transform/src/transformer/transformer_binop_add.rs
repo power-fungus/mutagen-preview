@@ -21,10 +21,10 @@ impl MutagenExprTransformer for MutagenTransformerBinopAdd {
                     .transform_info
                     .add_mutation("LitBinopAdd".to_string(), op_add.span());
                 let expr = parse_quote! {
-                    <::mutagen_preview::mutator::MutatorBinopAdd<_, _>>
+                    <::mutagen::mutator::MutatorBinopAdd<_, _>>
                         ::new(#mutator_id, #left, #right)
                         .run_mutator(
-                            &mutagen_preview::MutagenRuntimeConfig::get_default()
+                            &mutagen::MutagenRuntimeConfig::get_default()
                         )
                 };
                 ExprTransformerOutput::changed(expr, op_add.span())
