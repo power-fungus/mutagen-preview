@@ -15,7 +15,7 @@ impl MutatorLitBool {
         }
     }
 
-    pub fn run_mutator(self, runtime: &MutagenRuntimeConfig) -> bool {
+    pub fn run_mutator(self, runtime: MutagenRuntimeConfig) -> bool {
         if runtime.mutation_id != self.mutator_id {
             self.original_lit
         } else {
@@ -33,25 +33,25 @@ mod tests {
     #[test]
     pub fn false_inactive() {
         let mutator = MutatorLitBool::new(1, false);
-        let result = mutator.run_mutator(&MutagenRuntimeConfig::with_mutation_id(0));
+        let result = mutator.run_mutator(MutagenRuntimeConfig::with_mutation_id(0));
         assert_eq!(result, false)
     }
     #[test]
     pub fn true_inactive() {
         let mutator = MutatorLitBool::new(1, true);
-        let result = mutator.run_mutator(&MutagenRuntimeConfig::with_mutation_id(0));
+        let result = mutator.run_mutator(MutagenRuntimeConfig::with_mutation_id(0));
         assert_eq!(result, true)
     }
     #[test]
     pub fn false_active() {
         let mutator = MutatorLitBool::new(1, false);
-        let result = mutator.run_mutator(&MutagenRuntimeConfig::with_mutation_id(1));
+        let result = mutator.run_mutator(MutagenRuntimeConfig::with_mutation_id(1));
         assert_eq!(result, true)
     }
     #[test]
     pub fn true_active() {
         let mutator = MutatorLitBool::new(1, true);
-        let result = mutator.run_mutator(&MutagenRuntimeConfig::with_mutation_id(1));
+        let result = mutator.run_mutator(MutagenRuntimeConfig::with_mutation_id(1));
         assert_eq!(result, false)
     }
 

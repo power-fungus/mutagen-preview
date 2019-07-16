@@ -28,7 +28,8 @@ impl MutagenRuntimeConfig {
 
     fn from_env() -> Self {
         let mutation_id = env::var("MUTATION_ID")
-            .map(|s| s.parse().unwrap_or(0))
+            .ok()
+            .and_then(|s| s.parse().ok())
             .unwrap_or(0);
         MutagenRuntimeConfig { mutation_id }
     }

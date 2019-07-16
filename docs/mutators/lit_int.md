@@ -2,11 +2,11 @@
 
 ## Target Code
 
-int literals like `0`, `1u8`, `-5isize`
+Integer literals like `0`, `1u8`, `5isize`
 
 ## Mutations
 
-1. replacing the literal by one more
+1. replacing the literal by with a different literal
 
 ## Limitations
 

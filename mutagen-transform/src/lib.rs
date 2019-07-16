@@ -10,6 +10,7 @@ use syn::{parse_macro_input, ItemFn};
 mod args;
 mod transform_info;
 mod transformer;
+
 use args::MutagenArgs;
 
 #[proc_macro_attribute]
@@ -25,7 +26,5 @@ pub fn mutate(
     // run transformers one after the other
     let input = parse_macro_input!(item as ItemFn);
     let result = args.transformer_bundle.mutagen_transform_item_fn(input);
-    let result = result.into_token_stream().into();
-
-    result
+    result.into_token_stream().into()
 }

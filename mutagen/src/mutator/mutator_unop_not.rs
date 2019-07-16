@@ -15,7 +15,7 @@ impl<T: Not> MutatorUnopNot<T> {
         Self { mutator_id, val }
     }
 
-    pub fn run_mutator(self, runtime: &MutagenRuntimeConfig) -> <T as Not>::Output {
+    pub fn run_mutator(self, runtime: MutagenRuntimeConfig) -> <T as Not>::Output {
         if runtime.mutation_id != self.mutator_id {
             !self.val
         } else {
@@ -33,19 +33,19 @@ mod tests {
     fn boolnot_inactive() {
         // input is true, but will be negated by non-active mutator
         let mutator = MutatorUnopNot::new(1, true);
-        let result = mutator.run_mutator(&MutagenRuntimeConfig::with_mutation_id(0));
+        let result = mutator.run_mutator(MutagenRuntimeConfig::with_mutation_id(0));
         assert_eq!(result, false);
     }
     #[test]
     fn boolnot_active() {
         let mutator = MutatorUnopNot::new(1, true);
-        let result = mutator.run_mutator(&MutagenRuntimeConfig::with_mutation_id(1));
+        let result = mutator.run_mutator(MutagenRuntimeConfig::with_mutation_id(1));
         assert_eq!(result, true);
     }
     #[test]
     fn intnot_active() {
         let mutator = MutatorUnopNot::new(1, 1);
-        let result = mutator.run_mutator(&MutagenRuntimeConfig::with_mutation_id(1));
+        let result = mutator.run_mutator(MutagenRuntimeConfig::with_mutation_id(1));
         assert_eq!(result, 1);
     }
 
@@ -66,14 +66,14 @@ mod tests {
     #[test]
     fn optimistic_incorrect_inactive() {
         let mutator = MutatorUnopNot::new(1, OptimisticTestTypeX());
-        let result = mutator.run_mutator(&MutagenRuntimeConfig::with_mutation_id(0));
+        let result = mutator.run_mutator(MutagenRuntimeConfig::with_mutation_id(0));
         assert_eq!(result, OptimisticTestTypeY());
     }
     #[test]
     #[should_panic]
     fn optimistic_incorrect_active() {
         let mutator = MutatorUnopNot::new(1, OptimisticTestTypeX());
-        mutator.run_mutator(&MutagenRuntimeConfig::with_mutation_id(1));
+        mutator.run_mutator(MutagenRuntimeConfig::with_mutation_id(1));
     }
 
     mod test_boolnot {

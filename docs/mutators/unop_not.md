@@ -2,7 +2,7 @@
 
 ## Target Code
 
-`!` expressions like `!done`
+`!`-expressions like `!done`
 
 ## Mutations
 

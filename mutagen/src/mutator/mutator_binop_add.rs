@@ -20,7 +20,7 @@ impl<L: Add<R>, R> MutatorBinopAdd<L, R> {
         }
     }
 
-    pub fn run_mutator(self, runtime: &MutagenRuntimeConfig) -> <L as Add<R>>::Output {
+    pub fn run_mutator(self, runtime: MutagenRuntimeConfig) -> <L as Add<R>>::Output {
         if runtime.mutation_id != self.mutator_id {
             self.left + self.right
         } else {
@@ -36,27 +36,27 @@ mod tests {
     #[test]
     fn sum_inative() {
         let mutator = MutatorBinopAdd::new(1, 5, 4);
-        let result = mutator.run_mutator(&MutagenRuntimeConfig::with_mutation_id(0));
+        let result = mutator.run_mutator(MutagenRuntimeConfig::with_mutation_id(0));
         assert_eq!(result, 9);
     }
     #[test]
     fn sum_ative() {
         let mutator = MutatorBinopAdd::new(1, 5, 4);
-        let result = mutator.run_mutator(&MutagenRuntimeConfig::with_mutation_id(1));
+        let result = mutator.run_mutator(MutagenRuntimeConfig::with_mutation_id(1));
         assert_eq!(result, 1);
     }
 
     #[test]
     fn str_add_inactive() {
         let mutator = MutatorBinopAdd::new(1, "x".to_string(), "y");
-        let result = mutator.run_mutator(&MutagenRuntimeConfig::with_mutation_id(0));
+            let result = mutator.run_mutator(MutagenRuntimeConfig::with_mutation_id(0));
         assert_eq!(&result, "xy");
     }
     #[test]
     #[should_panic]
     fn str_add_active() {
         let mutator = MutatorBinopAdd::new(1, "x".to_string(), "y");
-        mutator.run_mutator(&MutagenRuntimeConfig::with_mutation_id(1));
+        mutator.run_mutator(MutagenRuntimeConfig::with_mutation_id(1));
     }
 
     mod test_sum_u32 {
@@ -117,8 +117,9 @@ mod tests {
         // sum of multiple values without brackets
         #[mutate(conf(local), only(binop_add))]
         pub fn multiple_adds(i: usize) -> usize {
-             i + 4 + 1
-         }
+            i + 4 + 1
+        }
+
         #[test]
         fn multiple_adds_inactive() {
             MutagenRuntimeConfig::test_with_mutation_id(0, || {

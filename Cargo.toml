@@ -1,5 +1,8 @@
 [workspace]
 members = [
     "mutagen",
-    "transform",
+    "mutagen-core",
+    "mutagen-runner",
+    "mutagen-transform",
+    "examples/simple",
 ]

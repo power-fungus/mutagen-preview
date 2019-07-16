@@ -24,46 +24,42 @@ impl ArgAst {
         let mut args = Vec::new();
 
         let mut tt_iter = input.into_iter();
-        loop {
-            if let Some(next) = tt_iter.next() {
-                if let TokenTree::Ident(arg_name) = next {
-                    // register arg-name and get handle to current arg
-                    let arg_name = arg_name.to_string();
-                    args.push(Self::new_named(arg_name));
-                    let new_arg = args.last_mut().unwrap();
+        while let Some(next) = tt_iter.next() {
+            if let TokenTree::Ident(arg_name) = next {
+                // register arg-name and get handle to current arg
+                let arg_name = arg_name.to_string();
+                args.push(Self::new_named(arg_name));
+                let new_arg = args.last_mut().unwrap();
 
-                    match tt_iter.next() {
-                        None => {}
-                        Some(TokenTree::Punct(p)) => {
-                            if p.as_char() != ',' {
-                                return Err(());
-                            }
-                            continue;
+                match tt_iter.next() {
+                    None => {}
+                    Some(TokenTree::Punct(p)) => {
+                        if p.as_char() != ',' {
+                            return Err(());
                         }
-                        Some(TokenTree::Group(g)) => {
-                            if g.delimiter() != Delimiter::Parenthesis {
-                                return Err(());
-                            }
-                            new_arg.args = Self::parse(g.stream())?;
-
-                            match tt_iter.next() {
-                                None => {}
-                                Some(TokenTree::Punct(p)) => {
-                                    if p.as_char() != ',' {
-                                        return Err(());
-                                    }
-                                    continue;
-                                }
-                                _ => return Err(()),
-                            }
-                        }
-                        _ => return Err(()),
+                        continue;
                     }
-                } else {
-                    return Err(());
+                    Some(TokenTree::Group(g)) => {
+                        if g.delimiter() != Delimiter::Parenthesis {
+                            return Err(());
+                        }
+                        new_arg.args = Self::parse(g.stream())?;
+
+                        match tt_iter.next() {
+                            None => {}
+                            Some(TokenTree::Punct(p)) => {
+                                if p.as_char() != ',' {
+                                    return Err(());
+                                }
+                                continue;
+                            }
+                            _ => return Err(()),
+                        }
+                    }
+                    _ => return Err(()),
                 }
             } else {
-                break;
+                return Err(());
             }
         }
 

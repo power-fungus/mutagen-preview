@@ -20,7 +20,7 @@ impl<T: IntMutable> MutatorLitInt<T> {
         }
     }
 
-    pub fn run_mutator(self, runtime: &MutagenRuntimeConfig) -> T {
+    pub fn run_mutator(self, runtime: MutagenRuntimeConfig) -> T {
         if runtime.mutation_id != self.mutator_id {
             self.original_lit
         } else {
@@ -66,14 +66,14 @@ mod tests {
     #[test]
     pub fn mutator_lit_int_zero_inactive() {
         let mutator = MutatorLitInt::new(1, 0);
-        let result = mutator.run_mutator(&MutagenRuntimeConfig::with_mutation_id(0));
+        let result = mutator.run_mutator(MutagenRuntimeConfig::with_mutation_id(0));
         assert_eq!(result, 0)
     }
 
     #[test]
     pub fn mutator_lit_int_zero_active() {
         let mutator = MutatorLitInt::new(1, 0);
-        let result = mutator.run_mutator(&MutagenRuntimeConfig::with_mutation_id(1));
+        let result = mutator.run_mutator(MutagenRuntimeConfig::with_mutation_id(1));
         assert_eq!(result, 1)
     }
 
@@ -81,7 +81,7 @@ mod tests {
     fn lit_u8_suffixed() {
         MutagenRuntimeConfig::test_with_mutation_id(1, || {
             let mutator = MutatorLitInt::new(1u32, 1u8);
-            let result = mutator.run_mutator(&MutagenRuntimeConfig::get_default());
+            let result = mutator.run_mutator(MutagenRuntimeConfig::get_default());
             assert_eq!(result, 2);
         })
     }

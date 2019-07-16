@@ -31,12 +31,14 @@ pub trait MutagenExprTransformer {
     fn map_expr(&mut self, expr: Expr) -> ExprTransformerOutput;
 }
 
-// TODO: document span
 pub enum ExprTransformerOutput {
     Transformed(TransformedExpr),
     Unchanged(Expr),
 }
 
+/// An Expr that has been transformed.
+///
+/// This struct also contains the span of the original code for further processing
 pub struct TransformedExpr {
     expr: Expr,
     span: Span,
@@ -166,7 +168,8 @@ fn mk_transformer(
 fn all_transformers() -> Vec<String> {
     ["lit_int", "lit_bool", "unop_not", "binop_add"]
         .iter()
-        .map(ToString::to_string)
+        .copied()
+        .map(ToOwned::to_owned)
         .collect()
 }
 
@@ -215,7 +218,7 @@ mod set_true_span {
 
 }
 
-/// if the flag `procmacro2_semver_exempt` is not enabled, a dummy implementation is provided, which does not change the spans 
+/// if the flag `procmacro2_semver_exempt` is not enabled, a dummy implementation is provided, which does not change the spans
 #[cfg(not(procmacro2_semver_exempt))]
 mod set_true_span {
     use proc_macro2::{Span, TokenStream};
